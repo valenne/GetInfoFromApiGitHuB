@@ -4,6 +4,64 @@ let submit = document.querySelector("button[type=submit]");
 submit.addEventListener("click", (e) => {
   e.preventDefault();
 
+  // base url api user
+  const API_USER = `https://api.github.com/users`;
+
+  // encargada de solicitar los datos
+  const request = async (url) => {
+    const results = await fetch(url);
+    const response = await results.json();
+    return response;
+  };
+
+  // crea la url de usuarios y solicita informacion
+  const getUser = async (nombre) => {
+    const url = `${API_USER}/${nombre}`;
+    return request(url);
+  };
+
+  // crea la url de repositorios y solicita informacion
+  const getRepo = async (user, pagina, cantidad_repos) => {
+    const url =
+      "https://api.github.com/users/" +
+      user +
+      "/repos?page=" +
+      pagina +
+      "&per_page=" +
+      cantidad_repos;
+
+    return request(url);
+  };
+
+  // captura los datos del usuario instanciando la funcion
+  const data = registrando();
+
+  // valida las promesas  y entrega la informacion
+  Promise.all([
+    getUser(data.user),
+    getRepo(data.user, data.pagina, data.cantidad_repos),
+  ])
+    .then((response) => {
+      // resultados
+      const user = response[0];
+      console.log(user);
+      const repos = response[1];
+      console.log(repos);
+
+      // desplega un objecto con los datos a utilizar en el dom
+      let arrUser = {
+        userName: user.name,
+        loginName: user.login,
+        nRepositories: user.public_repos,
+        localidad: user.location,
+        userType: user.type,
+      };
+
+      // pinta la informacion en el DOM
+      printUserInfo(arrUser, repos, data.cantidad_repos);
+    })
+    .catch((err) => console.log("err", err));
+
   // captura los valores de los input otorgados por el usuario
   // creando un object con la informacion
   function registrando() {
@@ -15,9 +73,9 @@ submit.addEventListener("click", (e) => {
     return data;
   }
 
-  // printing info on a dom
+  // printing info en el dom
   function printUserInfo(arrUser, repos, nRepositories) {
-    // captura el nodo de id resultados
+    // captura el nodo de resultados
     const div = document.getElementById("resultados");
     div.setAttribute("style", "display:flex;justify-content:space-between");
     // crea un div para alojar la info del usuario
@@ -39,7 +97,8 @@ submit.addEventListener("click", (e) => {
     setTimeout(() => {
       div_tres.appendChild(ul);
     }, 700);
-    // establece un timeout para evitar errores de appendchild
+
+    // pinta la informacion en el documento
     setTimeout(() => {
       for (let i = 0; i < Object.keys(arrUser).length; i++) {
         // crea el elementp p
@@ -63,7 +122,7 @@ submit.addEventListener("click", (e) => {
         }
       }
 
-      // se encarga de pintar la info de los repositorios segun cuantos se queran ver
+      // se encarga de pintar la info de los repositorios segun cuantos se quieran ver
       for (let i = 0; i < nRepositories; i++) {
         const li = document.createElement("li");
         li.style.listStyle = "none";
@@ -72,64 +131,6 @@ submit.addEventListener("click", (e) => {
         }</a>`;
         ul.appendChild(li);
       }
-    }, 2000);
+    }, 1000);
   }
-
-  // base url api user
-  const API_USER = `https://api.github.com/users`;
-
-  // encargada de solicitar los datos
-  const request = async (url) => {
-    const results = await fetch(url);
-    const response = await results.json();
-    return response;
-  };
-
-  // crea la url de usuarios
-  const getUser = async (nombre) => {
-    const url = `${API_USER}/${nombre}`;
-    return request(url);
-  };
-
-  // crea la url de repositorios
-  const getRepo = async (user, pagina, cantidad_repos) => {
-    const url =
-      "https://api.github.com/users/" +
-      user +
-      "/repos?page=" +
-      pagina +
-      "&per_page=" +
-      cantidad_repos;
-
-    return request(url);
-  };
-
-  // captura los dato del usuario instanciando la funcion
-  const data = registrando();
-
-  // valida las promesas  y entrega la informacion
-  Promise.all([
-    getUser(data.user),
-    getRepo(data.user, data.pagina, data.cantidad_repos),
-  ])
-    .then((response) => {
-      // resultados
-      const user = response[0];
-      console.log(user);
-      const repos = response[1];
-      console.log(repos);
-
-      // user information
-      let arrUser = {
-        userName: user.name,
-        loginName: user.login,
-        nRepositories: user.public_repos,
-        localidad: user.location,
-        userType: user.type,
-      };
-
-      // pinta la informacion en el DOM
-      printUserInfo(arrUser, repos, data.cantidad_repos);
-    })
-    .catch((err) => console.log("err", err));
 });
