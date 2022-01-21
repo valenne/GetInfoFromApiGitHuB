@@ -1,7 +1,8 @@
 // inicializa el nodo del id Button
-let submit = document.querySelector("button[type=submit]");
+const form = document.querySelector("form");
+const boton = document.querySelector("button[type=submit]");
 
-submit.addEventListener("click", (e) => {
+form.addEventListener("submit", (e) => {
   e.preventDefault();
 
   // base url api user
@@ -62,15 +63,43 @@ submit.addEventListener("click", (e) => {
     })
     .catch((err) => console.log("err", err));
 
+  /**********************FUNCIONES********************************* */
+
   // captura los valores de los input otorgados por el usuario
   // creando un object con la informacion
   function registrando() {
-    let data = {
-      user: document.getElementById("nombre").value,
-      pagina: document.getElementById("pagina").value,
-      cantidad_repos: document.getElementById("repoPagina").value,
-    };
-    return data;
+    const user = document.getElementById("nombre").value;
+    const pagina = document.getElementById("pagina").value;
+    const cantidad_repos = document.getElementById("repoPagina").value;
+
+    if (
+      user === "" ||
+      user === " " ||
+      !isNaN(user) ||
+      pagina === "" ||
+      pagina === " " ||
+      cantidad_repos === "" ||
+      cantidad_repos === " "
+    ) {
+      resetForm(form);
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+      });
+      alert("No dejes en blanco tu formulario 😫");
+      return null;
+    } else {
+      let data = {
+        user: document.getElementById("nombre").value,
+        pagina: document.getElementById("pagina").value,
+        cantidad_repos: document.getElementById("repoPagina").value,
+      };
+      return data;
+    }
+  }
+
+  // reset formulario
+  function resetForm(form) {
+    form.reset();
   }
 
   // printing info en el dom
@@ -132,5 +161,6 @@ submit.addEventListener("click", (e) => {
         ul.appendChild(li);
       }
     }, 1000);
+    resetForm(form);
   }
 });
